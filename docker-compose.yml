@@ -1,1 +1,32 @@
+version: '3.9'
 
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: deps # Use deps stage initially for faster install, override command later
+    image: kanban-todo-dev # Optional: name the development image
+    container_name: kanban_todo_web_dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount the entire app directory for development
+      - ./app:/app
+      # Keep node_modules from the container to avoid host OS conflicts
+      - /app/node_modules
+      # Mount .next separately if needed for cache persistence (optional)
+      # - ./app/.next:/app/.next
+    environment:
+      - NODE_ENV=development
+      # Add other environment variables here, e.g., Clerk keys (use .env file ideally)
+      # - CLERK_PUBLISHABLE_KEY=your_key_here
+      # - CLERK_SECRET_KEY=your_secret_here
+    command: npm run dev # Override the Dockerfile CMD for development
+    # Optional: Add healthcheck
+    # healthcheck:
+    #   test: ["CMD", "curl", "--fail", "http://localhost:3000"] # Adjust URL if needed
+    #   interval: 1m30s
+    #   timeout: 30s
+    #   retries: 3
+    #   start_period: 30s

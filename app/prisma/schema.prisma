@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../src/generated/prisma" // Original output path
+  // Use default node_modules location for simplicity
+}
+
+datasource db {
+  // provider = "sqlite"
+  provider = "sqlite" // Change back to SQLite for local development
+  url      = env("DATABASE_URL")
+  // relationMode = "prisma" // Add this if using Prisma Accelerate/Pulse later
+}
+
+// --- Models ---
+
+model User {
+  id      String   @id // Clerk User ID
+  email   String?  // Optional: Store email if needed
+  boards  Board[]  // Relation to Boards
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Board {
+  id          String   @id @default(uuid())
+  title       String
+  userId      String   // Foreign key to User
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  columns     Column[] // Relation to Columns
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Column {
+  id        String   @id @default(uuid())
+  title     String
+  order     Int      // Order of the column within the board
+  boardId   String   // Foreign key to Board
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  tasks     Task[]   // Relation to Tasks
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([boardId])
+}
+
+model Task {
+  id           String    @id @default(uuid())
+  title        String
+  description  String?   // Optional description
+  dueDate      DateTime? // Optional due date
+  order        Int       // Order of the task within the column
+  columnId     String    // Foreign key to Column
+  column       Column    @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  subtasks     Subtask[] // Relation to Subtasks
+  // labels    String?   // Add later if needed
+  // assigneeId String? // Add later if needed
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([columnId])
+}
+
+model Subtask {
+  id        String   @id @default(uuid())
+  title     String
+  done      Boolean  @default(false)
+  taskId    String   // Foreign key to Task
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([taskId])
+}
