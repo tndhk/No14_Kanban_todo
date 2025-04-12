@@ -38,6 +38,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog" // Import Alert Dialog for confirmation
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 
 // Define Task with Subtasks type
 interface TaskWithSubtasks extends Task {
@@ -172,6 +173,9 @@ export function TaskModal({ task, boardId, isOpen, onClose }: TaskModalProps) {
     if (currentTitle === task.title) formData.delete('title');
     if (currentDescription === task.description) formData.delete('description');
 
+    // In handleUpdateSubmit function, before the hasChanges check
+    console.log('Form keys:', Array.from(formData.keys()));
+
     // Only submit if there are actual changes
     let hasChanges = false;
     formData.forEach((value, key) => {
@@ -183,7 +187,7 @@ export function TaskModal({ task, boardId, isOpen, onClose }: TaskModalProps) {
     if (hasChanges) {
         updateFormAction(formData);
     } else {
-        toast.info("No changes detected."); // Inform user if no changes
+        toast.info("No changes detected.");
     }
   };
   
@@ -237,27 +241,33 @@ export function TaskModal({ task, boardId, isOpen, onClose }: TaskModalProps) {
     });
   };
 
+  // モーダルタイトル用の文字列（アクセシビリティ向上のため）
+  const modalTitle = `Task: ${task.title}`;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-2xl">
+        <VisuallyHidden.Root>
+          <DialogTitle>{modalTitle}</DialogTitle>
+        </VisuallyHidden.Root>
+        <DialogHeader className="mb-4">
+          {/* Editable Title */}
+          <Label htmlFor="task-title" className="sr-only">Task Title</Label>
+          <Input
+            id="task-title"
+            name="title"
+            defaultValue={currentTitle} 
+            className="text-lg font-semibold border-none shadow-none focus-visible:ring-0 p-0"
+          />
+          <p className="text-sm text-muted-foreground ml-1">
+            in column <span className="font-medium">{/* TODO: Get column name? */}</span>
+          </p>
+        </DialogHeader>
+
         <form action={handleUpdateSubmit} ref={formRef}>
           {/* Hidden fields */}
           <input type="hidden" name="taskId" value={task.id} />
           <input type="hidden" name="boardId" value={boardId} />
-
-          <DialogHeader className="mb-4">
-            {/* Editable Title */}
-            <Label htmlFor="task-title" className="sr-only">Task Title</Label>
-            <Input
-              id="task-title"
-              name="title"
-              defaultValue={currentTitle} // Or use controlled with onChange={e => setCurrentTitle(e.target.value)}
-              className="text-lg font-semibold border-none shadow-none focus-visible:ring-0 p-0"
-            />
-            <p className="text-sm text-muted-foreground ml-1">
-              in column <span className="font-medium">{/* TODO: Get column name? */}</span>
-            </p>
-          </DialogHeader>
 
           <div className="grid grid-cols-3 gap-4">
             {/* Main Content Area (Description, Subtasks etc.) */}
@@ -277,8 +287,8 @@ export function TaskModal({ task, boardId, isOpen, onClose }: TaskModalProps) {
                                 )}
                                 placeholder="Add a more detailed description..."
                                 defaultValue={currentDescription ?? ""}
+                                onChange={(e) => setCurrentDescription(e.target.value)}
                                 onKeyDown={(e) => { if (e.key === 'Escape') disableDescEditing(); }}
-                                // onBlur={disableDescEditing} // Maybe too aggressive
                             />
                             <div className="flex items-center gap-x-2">
                                 <Button type="submit" size="sm">Save</Button>
@@ -411,4 +421,4 @@ export function TaskModal({ task, boardId, isOpen, onClose }: TaskModalProps) {
       </DialogContent>
     </Dialog>
   );
-} 
+}

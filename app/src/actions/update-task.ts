@@ -12,7 +12,15 @@ const UpdateTaskSchema = z.object({
   boardId: z.string().uuid({ message: "Invalid Board ID." }), // For auth/revalidation
   title: z.string().min(1, { message: "Title cannot be empty." }).optional(),
   description: z.string().nullable().optional(), // Allow null or string
-  dueDate: z.date().nullable().optional(),        // Allow null or Date
+  dueDate: z.preprocess(
+    // Preprocess to handle string date or null properly
+    (val) => {
+      if (val === null || val === "null" || val === "") return null;
+      if (typeof val === "string") return new Date(val);
+      return val;
+    },
+    z.date().nullable().optional()
+  ),  // Allow null or Date
 });
 
 // Return type
@@ -53,48 +61,49 @@ export async function updateTask(
   // 2. Basic Validation (existence)
   const taskId = formData.get("taskId") as string;
   const boardId = formData.get("boardId") as string;
-  const title = formData.get("title") as string | undefined;
-  const description = formData.get("description") as string | null | undefined;
-  const dueDateStr = formData.get("dueDate") as string | null | undefined;
+  const title = formData.has("title") ? formData.get("title") as string : undefined;
+  const description = formData.has("description") ? 
+    (formData.get("description") as string || null) : undefined;
+  const dueDateStr = formData.has("dueDate") ? 
+    (formData.get("dueDate") as string || null) : undefined;
 
-  // Convert dueDate string to Date object or null
-  let dueDate: Date | null | undefined = undefined;
-  if (dueDateStr === "null" || dueDateStr === null || dueDateStr === "") {
-      dueDate = null;
-  } else if (dueDateStr) {
-      try {
-          dueDate = new Date(dueDateStr);
-          if (isNaN(dueDate.getTime())) throw new Error('Invalid Date');
-      } catch { 
-          return { errors: { dueDate: ["Invalid date format."] }, message: "Validation failed." };
-      } 
-  }
-
-  const validatedFields = UpdateTaskSchema.safeParse({
-    taskId,
-    boardId,
-    // Only include fields if they were actually present in the form submission
-    ...(title !== undefined && { title }),
-    ...(description !== undefined && { description }),
-    ...(dueDate !== undefined && { dueDate }),
-  });
-
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: "Validation failed. Could not update task.",
-    };
-  }
-
-  const updateData = createUpdateData(validatedFields.data);
-
-  // Check if there's anything to update
-  if (Object.keys(updateData).length === 0) {
-    return { message: "No changes detected." }; // Or maybe an error?
-  }
-
-  // 3. Authorization & Update
   try {
+    // パース前にコンソールで値を確認（デバッグ用）
+    console.log("Processing form data:", {
+      taskId,
+      boardId,
+      title,
+      description: description === "" ? "empty string" : description,
+      dueDateStr: dueDateStr === "" ? "empty string" : dueDateStr
+    });
+
+    const validatedFields = UpdateTaskSchema.safeParse({
+      taskId,
+      boardId,
+      ...(title !== undefined && { title }),
+      ...(description !== undefined && { description }),
+      ...(dueDateStr !== undefined && { dueDate: dueDateStr }),
+    });
+
+    if (!validatedFields.success) {
+      console.error("Validation error:", validatedFields.error.format());
+      return {
+        errors: validatedFields.error.flatten().fieldErrors,
+        message: "Validation failed. Could not update task.",
+      };
+    }
+
+    const updateData = createUpdateData(validatedFields.data);
+
+    // Check if there's anything to update
+    if (Object.keys(updateData).length === 0) {
+      return { message: "No changes detected." };
+    }
+
+    // コンソールで最終的な更新データを確認（デバッグ用）
+    console.log("Final update data:", updateData);
+
+    // 3. Authorization & Update
     // Verify user owns the board the task belongs to
     const task = await prismadb.task.findUnique({
       where: {
@@ -123,9 +132,16 @@ export async function updateTask(
 
   } catch (error) {
     if (error instanceof Error) {
+      console.error('Update task error:', error.message);
       if (error.message.includes('Expected string')) {
-        console.error('Type error: Ensure dueDate is properly formatted.');
-        return { errors: { dueDate: ['Expected string, but received null. Check input.'] }, message: 'Update failed due to type mismatch.' };
+        return { 
+          errors: { 
+            _general: ['Type conversion error. Please check the input format.'],
+            description: ['Cannot process description value. Make sure it\'s a valid string or null.'],
+            dueDate: ['Cannot process date value. Make sure it\'s a valid date format or null.']
+          }, 
+          message: 'Update failed due to data type mismatch.' 
+        };
       }
     }
     console.error('Database Error:', error);
@@ -142,4 +158,4 @@ export async function updateTask(
   return {
     message: `Task updated successfully.`, 
   };
-} 
+}
