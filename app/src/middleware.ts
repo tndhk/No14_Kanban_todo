@@ -17,4 +17,4 @@ export default clerkMiddleware((auth, req) => {
 export const config = {
   // Match all routes except static files and Next.js internals
   matcher: ["/((?!.*\\..*|_next).*)?", "/", "/(api|trpc)(.*)"],
-}; 
+};

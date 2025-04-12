@@ -19,10 +19,14 @@ services:
       # - ./app/.next:/app/.next
     environment:
       - NODE_ENV=development
+      - DATABASE_URL=file:/app/prisma/dev.db
       # Add other environment variables here, e.g., Clerk keys (use .env file ideally)
       # - CLERK_PUBLISHABLE_KEY=your_key_here
       # - CLERK_SECRET_KEY=your_secret_here
-    command: npm run dev # Override the Dockerfile CMD for development
+    command: >
+      sh -c "npx prisma generate && 
+             npx prisma migrate deploy && 
+             npm run dev"
     # Optional: Add healthcheck
     # healthcheck:
     #   test: ["CMD", "curl", "--fail", "http://localhost:3000"] # Adjust URL if needed

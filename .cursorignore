@@ -1,0 +1,43 @@
+# Node modules
+node_modules/
+
+# Git directory
+.git/
+
+# Next.js build output
+.next/
+out/
+
+# Docker related (if needed, but often useful context)
+# Dockerfile
+# docker-compose.yml
+
+# Environment files
+# .env
+# .env*
+# *.env
+# .env.*.local
+
+# Prisma generated client (usually in node_modules anyway)
+# prisma/generated/
+
+# OS generated files
+.DS_Store
+
+# Log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test outputs (if applicable)
+# coverage/
+# .nyc_output/
+
+# Editor/IDE specific
+.vscode/
+.idea/
+
+# Other build artifacts
+# *.tsbuildinfo 

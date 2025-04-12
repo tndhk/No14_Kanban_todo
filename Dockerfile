@@ -8,7 +8,6 @@ WORKDIR /app
 COPY app/package.json app/package-lock.json* ./
 
 # Install dependencies (ignore peer deps conflict for React 19)
-# RUN npm ci
 RUN npm ci --legacy-peer-deps
 
 # 2. Builder stage
@@ -20,6 +19,9 @@ COPY --from=deps /app/node_modules ./node_modules
 
 # Copy the rest of the application code
 COPY app/ ./
+
+# Generate Prisma client
+RUN npx prisma generate
 
 # Build the Next.js application
 RUN npm run build
@@ -39,6 +41,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=node:node /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
+COPY --from=builder /app/prisma ./prisma
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
