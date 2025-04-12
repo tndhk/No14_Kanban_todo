@@ -22,7 +22,7 @@ interface DeleteSubtaskState {
 export async function deleteSubtask(
   input: z.infer<typeof DeleteSubtaskSchema> // Use direct input for simplicity
 ): Promise<DeleteSubtaskState> {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   // 1. Auth Check
   if (!userId) {

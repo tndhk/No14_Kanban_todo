@@ -31,7 +31,7 @@ export async function createTask(
   prevState: CreateTaskState,
   formData: FormData
 ): Promise<CreateTaskState> {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   // 1. Auth Check
   if (!userId) {

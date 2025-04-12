@@ -28,7 +28,7 @@ export async function createColumn(
   prevState: CreateColumnState,
   formData: FormData
 ): Promise<CreateColumnState> {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   // 1. Check authentication
   if (!userId) {

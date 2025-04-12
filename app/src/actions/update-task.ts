@@ -41,7 +41,7 @@ export async function updateTask(
   prevState: UpdateTaskState,
   formData: FormData
 ): Promise<UpdateTaskState> {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   // 1. Auth Check
   if (!userId) {

@@ -29,7 +29,7 @@ interface UpdateColumnOrderState {
 export async function updateColumnOrder(
   input: z.infer<typeof UpdateColumnOrderSchema>
 ): Promise<UpdateColumnOrderState> {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   // 1. Auth Check
   if (!userId) {

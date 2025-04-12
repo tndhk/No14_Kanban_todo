@@ -30,7 +30,7 @@ interface UpdateTaskOrderState {
 export async function updateTaskOrder(
   input: z.infer<typeof UpdateTaskOrderSchema>
 ): Promise<UpdateTaskOrderState> {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   // 1. Auth Check
   if (!userId) {

@@ -26,7 +26,7 @@ export async function deleteTask(
   prevState: DeleteTaskState, // Keep pattern
   formData: FormData
 ): Promise<DeleteTaskState> {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   // 1. Auth Check
   if (!userId) {

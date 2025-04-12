@@ -23,7 +23,7 @@ interface ToggleSubtaskState {
 export async function toggleSubtask(
   input: z.infer<typeof ToggleSubtaskSchema>
 ): Promise<ToggleSubtaskState> {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   // 1. Auth Check
   if (!userId) {

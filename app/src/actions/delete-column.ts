@@ -26,7 +26,7 @@ export async function deleteColumn(
   prevState: DeleteColumnState, // Not strictly needed for simple delete, but keeps pattern
   formData: FormData
 ): Promise<DeleteColumnState> {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   // 1. Auth Check
   if (!userId) {

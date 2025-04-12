@@ -23,7 +23,7 @@ export async function createSubtask(
   prevState: CreateSubtaskState,
   formData: FormData
 ): Promise<CreateSubtaskState> {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   // 1. Auth Check
   if (!userId) {
