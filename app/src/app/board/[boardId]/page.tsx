@@ -1,7 +1,7 @@
 // Board Detail Page
 
 import { auth } from "@clerk/nextjs/server";
-import { notFound, useRouter } from "next/navigation";
+import { notFound } from "next/navigation";
 import prismadb from "@/lib/prisma";
 import { ColumnList } from "@/components/column-list";
 import { ModalManager } from "@/components/modal-manager";

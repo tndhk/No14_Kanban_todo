@@ -41,7 +41,11 @@ export default async function Home() {
             </Link>
           ))
         ) : (
-          <p>{userId ? "You haven't created any boards yet." : "Please sign in to see your boards."}</p>
+          !userId && (
+            <p>
+              Please sign in to see your boards. <Link href="/sign-in">Sign In</Link>
+            </p>
+          )
         )}
       </div>
     </div>

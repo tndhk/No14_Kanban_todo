@@ -25,7 +25,7 @@ export async function createBoard(
   prevState: CreateBoardState, // For useActionState hook
   formData: FormData
 ): Promise<CreateBoardState> {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   // 1. Check if user is authenticated
   if (!userId) {
@@ -50,22 +50,15 @@ export async function createBoard(
 
   // 3. Attempt to create the board in the database
   try {
-    // Optional: Check if user exists in our DB (if syncing)
-    // const userExists = await prismadb.user.findUnique({ where: { id: userId } });
-    // if (!userExists) { /* Handle or create user */ }
-
-    await prismadb.board.create({
-      data: {
-        title,
-        userId,
-        // Optionally add default columns here if desired
-      },
-    });
+    // Check if user exists and create if not
+    const existingUser = await prismadb.user.findUnique({ where: { id: userId } });
+    if (!existingUser) {
+      await prismadb.user.create({ data: { id: userId, email: 'default@example.com' } });  // Adjust email as needed
+    }
+    await prismadb.board.create({ data: { title, userId } });
   } catch (error) {
-    console.error("Database Error:", error);
-    return {
-      message: "Database Error: Failed to create board.",
-    };
+    console.error('Database Error:', error);
+    return { message: 'Database Error: Failed to create board.' };
   }
 
   // 4. Revalidate the path where boards are displayed (adjust path if needed)
