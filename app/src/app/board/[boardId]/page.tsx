@@ -5,6 +5,9 @@ import { notFound } from "next/navigation";
 import prismadb from "@/lib/prisma";
 import { ColumnList } from "@/components/column-list";
 import { ModalManager } from "@/components/modal-manager";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { startTransition } from 'react';
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 
 interface BoardPageProps {
   params: {
@@ -68,6 +71,14 @@ export default async function BoardPage({ params, searchParams }: BoardPageProps
 
       {/* Render Modal Manager */}
       <ModalManager boardId={board.id} columns={board.columns} />
+      <Dialog>
+        <DialogContent>
+          <VisuallyHidden.Root>
+            <DialogTitle>タイトルを追加（例: タスクの詳細）</DialogTitle>
+         </VisuallyHidden.Root>
+          {/* 既存のコンテンツ */}
+        </DialogContent>
+      </Dialog>
     </>
   );
 } 

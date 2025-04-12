@@ -33,7 +33,9 @@ function createUpdateData(validatedData: z.infer<typeof UpdateTaskSchema>) {
     const data: { title?: string; description?: string | null; dueDate?: Date | null } = {};
     if (validatedData.title !== undefined) data.title = validatedData.title;
     if (validatedData.description !== undefined) data.description = validatedData.description;
-    if (validatedData.dueDate !== undefined) data.dueDate = validatedData.dueDate;
+    if (validatedData.dueDate !== undefined) {
+      data.dueDate = validatedData.dueDate;  // Ensure it's Date or null
+    }
     return data;
 }
 
@@ -120,10 +122,16 @@ export async function updateTask(
     });
 
   } catch (error) {
-    console.error("Database Error:", error);
+    if (error instanceof Error) {
+      if (error.message.includes('Expected string')) {
+        console.error('Type error: Ensure dueDate is properly formatted.');
+        return { errors: { dueDate: ['Expected string, but received null. Check input.'] }, message: 'Update failed due to type mismatch.' };
+      }
+    }
+    console.error('Database Error:', error);
     return {
-      errors: { _general: ["Database Error: Failed to update task."] },
-      message: "Database operation failed.",
+      errors: { _general: ['Database Error: Failed to update task.'] },
+      message: 'Database operation failed.',
     };
   }
 
