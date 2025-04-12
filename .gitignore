@@ -1,0 +1,17 @@
+# バックテスト結果とログ
+logs/
+results/
+cache/
+data/
+
+# 機密ファイル（APIキーなど）
+.env
+
+# OS固有
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
