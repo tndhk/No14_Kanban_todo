@@ -20,8 +20,6 @@ interface BoardPageProps {
 
 export default async function BoardPage({ params, searchParams }: BoardPageProps) {
   const { userId } = await auth();
-  console.log('Params received:', params);
-  console.log('BoardId specifically:', params?.boardId);
   try {
     const { boardId } = params;
 

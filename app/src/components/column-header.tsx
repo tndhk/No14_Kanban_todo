@@ -4,6 +4,17 @@ import { useState, useRef, useActionState, useEffect, useTransition } from 'reac
 import { toast } from 'sonner';
 import { Column } from '@prisma/client';
 import { X } from 'lucide-react'; // Import X icon
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog" // Import Alert Dialog
 
 import { updateColumnTitle } from '@/actions/update-column-title';
 import { deleteColumn } from '@/actions/delete-column'; // Import delete action
@@ -113,23 +124,41 @@ export function ColumnHeader({ column, boardId }: ColumnHeaderProps) {
       >
         {column.title}
       </div>
-      {/* Delete Button Form */}
-      <form action={deleteFormAction}>
-        <input type="hidden" name="columnId" value={column.id} />
-        <input type="hidden" name="boardId" value={boardId} />
-        <Button
-          type="submit"
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 text-gray-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50"
-          aria-label="Delete column"
-          title="Delete column"
-          // Add confirmation later if desired
-          // onClick={(e) => { if (!confirm('Are you sure?')) e.preventDefault(); }}
-        >
-          <X className="h-4 w-4" />
-        </Button>
-      </form>
+      {/* Delete Button with Confirmation */}
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-gray-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50"
+            aria-label="Delete column"
+            title="Delete column"
+            // onClick is handled by AlertDialogTrigger now
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the column
+              and all associated tasks. Are you absolutely sure?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            {/* Form needs to be triggered by the action button */}
+            <form action={deleteFormAction} className="inline-block">
+              <input type="hidden" name="columnId" value={column.id} />
+              <input type="hidden" name="boardId" value={boardId} />
+              <AlertDialogAction type="submit" className="bg-red-600 hover:bg-red-700">
+                Delete Column
+              </AlertDialogAction>
+            </form>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 } 

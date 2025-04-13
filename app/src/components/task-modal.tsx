@@ -264,15 +264,17 @@ export function TaskModal({ task, boardId, isOpen, onClose }: TaskModalProps) {
           </p>
         </DialogHeader>
 
-        <form action={handleUpdateSubmit} ref={formRef}>
-          {/* Hidden fields */}
-          <input type="hidden" name="taskId" value={task.id} />
-          <input type="hidden" name="boardId" value={boardId} />
+        {/* Main Content Grid - Moved Form tag inside */}
+        <div className="grid grid-cols-3 gap-4">
+          {/* Main Content Area (Description, Subtasks etc.) */}
+          <div className="col-span-3 md:col-span-2 space-y-6">
+            {/* Description Section */}
+            <form action={handleUpdateSubmit} ref={formRef} id="update-task-form">
+              {/* Hidden fields - Moved inside form */}
+              <input type="hidden" name="taskId" value={task.id} />
+              <input type="hidden" name="boardId" value={boardId} />
 
-          <div className="grid grid-cols-3 gap-4">
-            {/* Main Content Area (Description, Subtasks etc.) */}
-            <div className="col-span-3 md:col-span-2 space-y-6">
-              {/* Description Section */}
+              {/* Description Section Content */}
               <div className="flex items-start gap-x-3 w-full">
                  <AlignLeft className="h-5 w-5 mt-0.5 text-neutral-700 dark:text-neutral-300" />
                  <div className="w-full">
@@ -289,9 +291,10 @@ export function TaskModal({ task, boardId, isOpen, onClose }: TaskModalProps) {
                                 defaultValue={currentDescription ?? ""}
                                 onChange={(e) => setCurrentDescription(e.target.value)}
                                 onKeyDown={(e) => { if (e.key === 'Escape') disableDescEditing(); }}
+                                form="update-task-form" // Associate with main form
                             />
                             <div className="flex items-center gap-x-2">
-                                <Button type="submit" size="sm">Save</Button>
+                                <Button type="submit" size="sm" form="update-task-form">Save</Button> {/* Submit main form */}
                                 <Button type="button" variant="ghost" size="sm" onClick={disableDescEditing}>Cancel</Button>
                             </div>
                         </div>
@@ -304,120 +307,133 @@ export function TaskModal({ task, boardId, isOpen, onClose }: TaskModalProps) {
                              {currentDescription || "Add a more detailed description..."}
                         </div>
                     )}
-                </div>
+                  </div>
               </div>
-              
-              {/* Subtask Section */}  
-              {task.subtasks && task.subtasks.length > 0 && (
-                 <div className="flex items-start gap-x-3 w-full">
-                    <Check className="h-5 w-5 mt-0.5 text-neutral-700 dark:text-neutral-300" />
-                    <div className="w-full">
-                        <div className="flex justify-between items-center mb-2">
-                            <p className="font-semibold text-neutral-700 dark:text-neutral-300">Subtasks</p>
-                            <span className="text-xs text-muted-foreground">
-                                {completedSubtasks}/{totalSubtasks}
-                            </span>
-                        </div>
-                        {/* Progress Bar (Optional - simple div for now) */}
-                        <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2 mb-4">
-                            <div 
-                                className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
-                                style={{ width: `${progress}%` }} 
-                            />
-                        </div>
-                        {/* Subtask List */}
-                        <div className="space-y-2">
-                            {task.subtasks.map(subtask => (
-                                <div key={subtask.id} className="flex items-center space-x-2 bg-neutral-100 dark:bg-neutral-800/50 p-2 rounded group">
-                                    <Checkbox 
-                                        id={`subtask-${subtask.id}`}
-                                        checked={subtask.done}
-                                        disabled={isPending} // Disable checkbox during transition
-                                        onCheckedChange={(checked) => handleSubtaskToggle(subtask.id, !!checked)}
-                                    />
-                                    <label 
-                                        htmlFor={`subtask-${subtask.id}`} 
-                                        className={`flex-grow text-sm cursor-pointer ${subtask.done ? 'line-through text-muted-foreground' : ''}`}
-                                    >
-                                        {subtask.title}
-                                    </label>
-                                    {/* Delete button for subtask */}
-                                    <Button 
-                                        variant="ghost" 
-                                        size="icon" 
-                                        className="h-6 w-6 ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-rose-500 hover:text-rose-700"
-                                        onClick={() => handleSubtaskDelete(subtask.id)}
-                                        disabled={isPending}
-                                        aria-label="Delete subtask"
-                                    >
-                                        <Trash2 className="h-4 w-4"/>
-                                    </Button>
-                                </div>
-                            ))}
-                        </div>
-                        {/* Form to create new subtasks */}
-                        <form action={createSubtaskFormAction} ref={subtaskFormRef} className="mt-3 flex items-center space-x-2">
-                            <input type="hidden" name="taskId" value={task.id} />
-                            <input type="hidden" name="boardId" value={boardId} />
-                            <Input 
-                                ref={subtaskInputRef}
-                                name="title" 
-                                placeholder="Add a subtask..." 
-                                className="h-8 flex-grow text-sm px-2"
-                                aria-describedby={`create-subtask-error-${task.id}`}
-                            />
-                            <Button type="submit" size="sm">Add</Button>
-                        </form>
-                        {createSubtaskState?.errors?.title && (
-                            <div id={`create-subtask-error-${task.id}`} aria-live="polite" className="mt-1 text-xs text-destructive">
-                                {createSubtaskState.errors.title.join(", ")}
-                            </div>
-                        )}
+              {/* End of Description Section within form */}
+            </form> { /* End of main form for description */}
+
+            {/* Subtask Section - Now completely outside the main form */}
+            <div className="flex items-start gap-x-3 w-full">
+              <Check className="h-5 w-5 mt-0.5 text-neutral-700 dark:text-neutral-300" />
+              <div className="w-full">
+                  <div className="flex justify-between items-center mb-2">
+                      <p className="font-semibold text-neutral-700 dark:text-neutral-300">Subtasks</p>
+                      {task.subtasks && task.subtasks.length > 0 && (
+                        <span className="text-xs text-muted-foreground">
+                            {completedSubtasks}/{totalSubtasks}
+                        </span>
+                      )}
+                  </div>
+                  
+                  {/* Progress Bar - Only shown if there are subtasks */}
+                  {task.subtasks && task.subtasks.length > 0 && (
+                    <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2 mb-4">
+                        <div 
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
+                            style={{ width: `${progress}%` }} 
+                        />
                     </div>
-                 </div>
-              )}
+                  )}
+                  
+                  {/* Subtask List - Only shown if there are subtasks */}
+                  {task.subtasks && task.subtasks.length > 0 ? (
+                      <div className="space-y-2 mb-4">
+                          {task.subtasks.map(subtask => (
+                              <div key={subtask.id} className="flex items-center space-x-2 bg-neutral-100 dark:bg-neutral-800/50 p-2 rounded group">
+                                  <Checkbox 
+                                      id={`subtask-${subtask.id}`}
+                                      checked={subtask.done}
+                                      disabled={isPending}
+                                      onCheckedChange={(checked) => handleSubtaskToggle(subtask.id, !!checked)}
+                                  />
+                                  <label 
+                                      htmlFor={`subtask-${subtask.id}`} 
+                                      className={`flex-grow text-sm cursor-pointer ${subtask.done ? 'line-through text-muted-foreground' : ''}`}
+                                  >
+                                      {subtask.title}
+                                  </label>
+                                  <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      className="h-6 w-6 ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-rose-500 hover:text-rose-700"
+                                      onClick={() => handleSubtaskDelete(subtask.id)}
+                                      disabled={isPending}
+                                      aria-label="Delete subtask"
+                                  >
+                                      <Trash2 className="h-4 w-4"/>
+                                  </Button>
+                              </div>
+                          ))}
+                      </div>
+                  ) : (
+                      <p className="text-sm text-muted-foreground mb-4">No subtasks yet. Add one below.</p>
+                  )}
+              </div>
             </div>
 
-            {/* Sidebar Area (Due Date, Actions) */}
-            <div className="col-span-3 md:col-span-1 space-y-4">
-              <Label>Due Date</Label>
-              <DatePicker date={currentDueDate} setDate={setCurrentDueDate} />
-              
-              <Label>Actions</Label>
-              {/* Delete Button with Confirmation */}
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="w-full justify-start">
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete Task
-                    </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete the task
-                      and any associated subtasks.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    {/* Use a regular button to trigger the delete action form submission */}
-                    <AlertDialogAction onClick={handleDeleteSubmit} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+            {/* Form to create new subtasks - Remains separate */}
+            <div className="flex items-start gap-x-3 w-full mt-4">
+              <div className="w-5" /> {/* Spacer */}
+              <div className="w-full">
+                <form action={createSubtaskFormAction} ref={subtaskFormRef} className="flex items-center space-x-2">
+                  <input type="hidden" name="taskId" value={task.id} />
+                  <input type="hidden" name="boardId" value={boardId} />
+                  <Input 
+                      ref={subtaskInputRef}
+                      name="title" 
+                      placeholder="Add a subtask..." 
+                      className="h-8 flex-grow text-sm px-2"
+                      aria-describedby={`create-subtask-error-${task.id}`}
+                  />
+                  <Button type="submit" size="sm">Add</Button>
+                </form>
+                {createSubtaskState?.errors?.title && (
+                    <div id={`create-subtask-error-${task.id}`} aria-live="polite" className="mt-1 text-xs text-destructive">
+                        {createSubtaskState.errors.title.join(", ")}
+                    </div>
+                )}
+              </div>
             </div>
+            {/* End of Subtask Related Sections */}
           </div>
 
-          <DialogFooter className="mt-6">
-            {/* Optionally hide submit button if fields auto-save? 
-                Or have explicit save? Current setup saves on button click/blur? 
-                Needs refinement. Let's use an explicit Save button for now. 
-            */}
-             <Button type="submit">Save Changes</Button>
-          </DialogFooter>
-        </form>
+          {/* Sidebar Area (Due Date, Actions) */}
+          <div className="col-span-3 md:col-span-1 space-y-4">
+            <Label>Due Date</Label>
+            {/* DatePicker needs to submit the main form now */}
+            <DatePicker date={currentDueDate} setDate={(newDate) => { setCurrentDueDate(newDate); /* Consider triggering form save here or via main button */ }} />
+            
+            <Label>Actions</Label>
+            {/* Delete Task Button */} 
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="w-full justify-start">
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Task
+                  </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the task
+                    and any associated subtasks.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  {/* Use a regular button to trigger the delete action form submission */}
+                  <AlertDialogAction onClick={handleDeleteSubmit} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </div>
+
+        <DialogFooter className="mt-6">
+          {/* Submit button for the main form */}
+           <Button type="submit" form="update-task-form">Save Changes</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
