@@ -151,7 +151,7 @@ export function ColumnList({ initialColumns, boardId }: ColumnListProps) {
           <div
             {...provided.droppableProps}
             ref={provided.innerRef}
-            className="flex space-x-4 overflow-x-auto pb-4 items-start" // Added items-start
+            className="flex space-x-2 sm:space-x-4 overflow-x-auto pb-4 items-start" // Adjusted spacing
           >
             {/* Column List */}
             {orderedColumns.map((column, index) => (
@@ -160,7 +160,7 @@ export function ColumnList({ initialColumns, boardId }: ColumnListProps) {
                   <div
                     {...provided.draggableProps}
                     ref={provided.innerRef}
-                    className="min-w-[280px] bg-gray-100 dark:bg-gray-800 rounded-lg shadow flex flex-col" // Flex column layout
+                    className="w-full sm:min-w-[280px] max-w-[280px] bg-gray-100 dark:bg-gray-800 rounded-lg shadow flex flex-col" // Adjusted width
                   >
                     <div {...provided.dragHandleProps} className="p-3 pb-1"> {/* Padding for header */}
                       <ColumnHeader column={column} boardId={boardId} />
@@ -197,8 +197,12 @@ export function ColumnList({ initialColumns, boardId }: ColumnListProps) {
             ))}
             {provided.placeholder} {/* Placeholder for dragging items */}
 
-            {/* Add Column Form */}
-            <CreateColumnForm boardId={boardId} />
+            {/* REMOVE Add Column Form from here */}
+            {/* 
+            <div className="w-full sm:min-w-[280px] max-w-[280px] flex-shrink-0">
+              <CreateColumnForm boardId={boardId} />
+            </div>
+            */}
           </div>
         )}
       </Droppable>

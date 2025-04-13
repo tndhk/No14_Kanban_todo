@@ -8,6 +8,7 @@ import { ModalManager } from "@/components/modal-manager";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { startTransition } from 'react';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
+import { CreateColumnForm } from "@/components/create-column-form";
 
 interface BoardPageProps {
   params: {
@@ -63,8 +64,11 @@ export default async function BoardPage({ params, searchParams }: BoardPageProps
 
     return (
       <>
-        <div className="p-4 md:p-8 h-full overflow-x-auto">
-          <h1 className="text-2xl font-bold mb-4">Board: {board.title}</h1>
+        <div className="p-2 sm:p-4 md:p-8 h-full overflow-x-auto">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl font-bold">Board: {board.title}</h1>
+            <CreateColumnForm boardId={board.id} />
+          </div>
 
           {/* Render ColumnList component */}
           <ColumnList initialColumns={board.columns} boardId={board.id} />
